@@ -12,7 +12,7 @@ const app = express();
 // Configure CORS
 const allowedOrigins = [
   'http://localhost:3000',
-  'https://your-vercel-app-url.vercel.app'  // Replace with your Vercel app URL
+  'https://chatapp-hemantmeena2005.vercel.app'  // We'll update this with your Vercel URL
 ];
 
 app.use(cors({
@@ -31,9 +31,6 @@ app.use(express.json());
 // Connect to MongoDB
 connectDB();
 
-// Serve static files from the React app
-app.use(express.static(path.join(__dirname, 'client/build')));
-
 // API Routes
 app.get('/api/messages', async (req, res) => {
   try {
@@ -44,10 +41,21 @@ app.get('/api/messages', async (req, res) => {
   }
 });
 
-// Handle React routing, return all requests to React app
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'client/build', 'index.html'));
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
+
+// Serve static files only in production and if they exist
+if (process.env.NODE_ENV === 'production') {
+  const buildPath = path.join(__dirname, 'client/build');
+  if (require('fs').existsSync(buildPath)) {
+    app.use(express.static(buildPath));
+    app.get('*', (req, res) => {
+      res.sendFile(path.join(buildPath, 'index.html'));
+    });
+  }
+}
 
 const server = http.createServer(app);
 const io = socketIo(server, {
@@ -134,7 +142,7 @@ io.on('connection', async (socket) => {
   });
 });
 
-const PORT = process.env.PORT || 5001;
+const PORT = process.env.PORT || 10000;
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 }); 
