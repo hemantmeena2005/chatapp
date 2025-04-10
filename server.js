@@ -9,20 +9,9 @@ require('dotenv').config();
 
 const app = express();
 
-// Configure CORS
-const allowedOrigins = [
-  'http://localhost:3000',
-  'https://chatapp-hemantmeena2005.vercel.app'  // We'll update this with your Vercel URL
-];
-
+// Configure CORS - accept all origins in development
 app.use(cors({
-  origin: function(origin, callback) {
-    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
+  origin: '*',
   credentials: true
 }));
 
@@ -60,7 +49,7 @@ if (process.env.NODE_ENV === 'production') {
 const server = http.createServer(app);
 const io = socketIo(server, {
   cors: {
-    origin: allowedOrigins,
+    origin: '*',
     methods: ["GET", "POST"],
     credentials: true
   }
